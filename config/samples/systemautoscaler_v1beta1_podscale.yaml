@@ -1,0 +1,9 @@
+apiVersion: systemautoscaler.polimi.it/v1beta1
+kind: PodScale
+metadata:
+  labels:
+    app.kubernetes.io/name: np-tester
+    app.kubernetes.io/managed-by: kustomize
+  name: podscale-sample
+spec:
+  # TODO(user): Add fields here

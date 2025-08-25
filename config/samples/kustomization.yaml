@@ -1,0 +1,5 @@
+## Append samples of your project ##
+resources:
+- systemautoscaler_v1beta1_podscale.yaml
+- neptuneplus_v1alpha1_dependencygraph.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

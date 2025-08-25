@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: np-tester-deployment
+  namespace: kube-system
+  labels:
+    app: np-tester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: np-tester
+  template:
+    metadata:
+      labels:
+        app: np-tester
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: "true"
+      automountServiceAccountToken: true
+      serviceAccountName: np-tester-manager-sa
+      containers:
+        - name: np-tester-container
+          image: itspeetah/np-tester:dev
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080 # Assuming the application listens on port 8080
+          resources:
+            requests:
+              # Guaranteed minimum
+              cpu: "50m" # 0.05 CPU core
+              memory: "128Mi"
+            limits:
+              # Absolute maximum (higher than request for burst CPU)
+              cpu: "100m" # 0.1 CPU core
+              memory: "128Mi"

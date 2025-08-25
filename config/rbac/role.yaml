@@ -1,0 +1,73 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - custom.metrics.k8s.io
+  resources:
+  - pods/response_time
+  verbs:
+  - get
+- apiGroups:
+  - neptuneplus.polimi.it
+  resources:
+  - dependencygraphs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - neptuneplus.polimi.it
+  resources:
+  - dependencygraphs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - neptuneplus.polimi.it
+  resources:
+  - dependencygraphs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - systemautoscaler.polimi.it
+  resources:
+  - podscales
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - systemautoscaler.polimi.it
+  resources:
+  - podscales/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - systemautoscaler.polimi.it
+  resources:
+  - podscales/status
+  verbs:
+  - get
+  - patch
+  - update
