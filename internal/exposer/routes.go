@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"itspeetah/np-tester/internal/monitor"
 	"net/http"
+
+	"k8s.io/klog/v2"
 )
 
 func setupHttpRoutes(e *Exposer) {
@@ -20,12 +22,17 @@ func setupHttpRoutes(e *Exposer) {
 		}
 	})
 
-	http.HandleFunc("/latest-log", e.handleLatestLog)
-}
+	http.HandleFunc("/latest-log", func(w http.ResponseWriter, req *http.Request) {
+		klog.Info("[EXPOSER] requested latest log")
+		txt := e.getLatestLog()
+		fmt.Fprint(w, txt)
+	})
 
-func (e *Exposer) handleLatestLog(w http.ResponseWriter, req *http.Request) {
-	txt := e.getLatestLog()
-	fmt.Fprint(w, txt)
+	http.HandleFunc("/reset-cached", func(w http.ResponseWriter, req *http.Request) {
+		klog.Info("[EXPOSER] requested cached value reset")
+		e.clearCachedValues()
+		fmt.Fprint(w, "OK")
+	})
 }
 
 func (e *Exposer) getLatestLog() string {
@@ -72,4 +79,10 @@ func (e *Exposer) getLatestLog() string {
 	})
 
 	return buffer.String()
+}
+
+func (e *Exposer) clearCachedValues() {
+	e.depDagExtRTs.Clear()
+	e.podResponseTimes.Clear()
+	e.podscaleData.Clear()
 }

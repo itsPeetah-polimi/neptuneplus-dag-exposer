@@ -38,6 +38,9 @@ neptune-undeploy:
 .PHONY: neptune-redeploy
 neptune-redeploy: neptune-undeploy neptune-deploy
 
+.PHONY: neptune-release
+neptune-release: neptune-build neptune-redeploy
+
 
 .PHONY: all
 all: build
