@@ -56,6 +56,7 @@ func (r *PodScaleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Info("podscale resource not found. Ignoring since object must be deleted")
+			r.PodScaleData.Delete(req.NamespacedName)
 			return ctrl.Result{}, nil
 		}
 		klog.Error(err)

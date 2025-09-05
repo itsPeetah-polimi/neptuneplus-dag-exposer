@@ -61,6 +61,7 @@ func (r *DependencyGraphReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Info("dependencygraph resource not found. Ignoring since object must be deleted")
+			r.ExternalResponseTimes.Delete(req.NamespacedName)
 			return ctrl.Result{}, nil
 		}
 		klog.Error(err, "Failed to get dependencygraph")
