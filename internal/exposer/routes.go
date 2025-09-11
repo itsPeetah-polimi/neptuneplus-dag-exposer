@@ -38,7 +38,6 @@ func setupHttpRoutes(e *Exposer) {
 func (e *Exposer) getLatestLog() string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString("PODSCALES\n")
 	e.podscaleData.Range(func(key any, value any) bool {
 
 		keyAsStr, _ := key.(string)
@@ -46,7 +45,7 @@ func (e *Exposer) getLatestLog() string {
 
 		buffer.WriteString(
 			fmt.Sprintf(
-				"%s %s %s %s %d %d %d\n",
+				"[podscales]\t%s\t%s\t%s\t%s\t%d\t%d\t%d\n",
 				keyAsStr,
 				podScaleData.Name,
 				podScaleData.Pod,
@@ -58,22 +57,20 @@ func (e *Exposer) getLatestLog() string {
 
 		return true
 	})
-	buffer.WriteString("EXT. RES. TIMES\n")
 	e.depDagExtRTs.Range(func(key any, value any) bool {
 
 		keyAsStr, _ := key.(string)
 		valueAsInt64, _ := value.(int64)
 
-		buffer.WriteString(fmt.Sprintf("%s %d\n", keyAsStr, valueAsInt64))
+		buffer.WriteString(fmt.Sprintf("[ext-time]\t%s\t%d\n", keyAsStr, valueAsInt64))
 
 		return true
 	})
-	buffer.WriteString("POD RES. TIMES\n")
 	e.podResponseTimes.Range(func(key any, value any) bool {
 		keyAsStr, _ := key.(string)
 		valueAsInt64, _ := value.(int64)
 
-		buffer.WriteString(fmt.Sprintf("%s %d\n", keyAsStr, valueAsInt64))
+		buffer.WriteString(fmt.Sprintf("[res-time]\t%s\t%d\n", keyAsStr, valueAsInt64))
 
 		return true
 	})
