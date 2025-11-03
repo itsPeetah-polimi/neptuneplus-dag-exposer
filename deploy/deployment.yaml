@@ -32,3 +32,17 @@ spec:
             limits:
               cpu: "1000m"
               memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-dag-expo-service
+  namespace: kube-system
+spec:
+  selector:
+    app: np-dag-expo
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
