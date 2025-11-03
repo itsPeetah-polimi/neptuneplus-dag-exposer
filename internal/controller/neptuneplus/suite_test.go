@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	neptuneplusv1alpha1 "itspeetah/np-tester/api/neptuneplus/v1alpha1"
+	neptuneplusv1alpha1 "itspeetah/np-dag-expo/api/neptuneplus/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 

@@ -2,17 +2,15 @@ package exposer
 
 import (
 	"fmt"
+	"itspeetah/np-dag-expo/internal/controller/neptuneplus"
 	"net/http"
 
-	"github.com/modern-go/concurrent"
 	"k8s.io/klog/v2"
 )
 
 type Exposer struct {
-	podscaleData     *concurrent.Map
-	depDagExtRTs     *concurrent.Map
-	podResponseTimes *concurrent.Map
-	httpConfig       ExposerHttpConfig
+	httpConfig ExposerHttpConfig
+	depDagCtrl *neptuneplus.DependencyGraphReconciler
 }
 
 type ExposerHttpConfig struct {
@@ -22,15 +20,11 @@ type ExposerHttpConfig struct {
 
 func NewExposer(
 	httpConfig ExposerHttpConfig,
-	inPodscales *concurrent.Map,
-	extRTMap *concurrent.Map,
-	podResponseTimes *concurrent.Map,
+	ddr *neptuneplus.DependencyGraphReconciler,
 ) Exposer {
 	return Exposer{
-		httpConfig:       httpConfig,
-		podscaleData:     inPodscales,
-		depDagExtRTs:     extRTMap,
-		podResponseTimes: podResponseTimes,
+		httpConfig: httpConfig,
+		depDagCtrl: ddr,
 	}
 }
 

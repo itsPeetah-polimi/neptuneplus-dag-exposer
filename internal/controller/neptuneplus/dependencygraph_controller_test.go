@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	neptuneplusv1alpha1 "itspeetah/np-tester/api/neptuneplus/v1alpha1"
+	neptuneplusv1alpha1 "itspeetah/np-dag-expo/api/neptuneplus/v1alpha1"
 )
 
 var _ = Describe("DependencyGraph Controller", func() {

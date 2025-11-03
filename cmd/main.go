@@ -22,12 +22,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	"github.com/modern-go/concurrent"
-	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,19 +38,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	"sigs.k8s.io/custom-metrics-apiserver/pkg/dynamicmapper"
 
-	neptuneplusv1alpha1 "itspeetah/np-tester/api/neptuneplus/v1alpha1"
-	systemautoscalerv1beta1 "itspeetah/np-tester/api/systemautoscaler/v1beta1"
-	neptunepluscontroller "itspeetah/np-tester/internal/controller/neptuneplus"
-	systemautoscalercontroller "itspeetah/np-tester/internal/controller/systemautoscaler"
-	"itspeetah/np-tester/internal/exposer"
-	"itspeetah/np-tester/internal/monitor"
-
-	metrics "itspeetah/np-tester/internal/metrics"
-
-	"k8s.io/client-go/tools/clientcmd"
-	metricsclient "k8s.io/metrics/pkg/client/custom_metrics"
+	neptuneplusv1alpha1 "itspeetah/np-dag-expo/api/neptuneplus/v1alpha1"
+	neptunepluscontroller "itspeetah/np-dag-expo/internal/controller/neptuneplus"
+	"itspeetah/np-dag-expo/internal/exposer"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -64,7 +53,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(systemautoscalerv1beta1.AddToScheme(scheme))
 	utilruntime.Must(neptuneplusv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
@@ -218,22 +206,14 @@ func main() {
 	}
 
 	depDagERTs := concurrent.NewMap()
-	podscaleData := concurrent.NewMap()
-	podResponseTimes := concurrent.NewMap()
 
-	if err := (&systemautoscalercontroller.PodScaleReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		PodScaleData: podscaleData,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodScale")
-		os.Exit(1)
+	ddr := &neptunepluscontroller.DependencyGraphReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		DepDags: depDagERTs,
 	}
-	if err := (&neptunepluscontroller.DependencyGraphReconciler{
-		Client:                mgr.GetClient(),
-		Scheme:                mgr.GetScheme(),
-		ExternalResponseTimes: depDagERTs,
-	}).SetupWithManager(mgr); err != nil {
+
+	if err := ddr.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DependencyGraph")
 		os.Exit(1)
 	}
@@ -264,34 +244,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	/* METRIC CLIENT SETUP*/
-	config, err := clientcmd.BuildConfigFromFlags("", "")
-	if err != nil {
-		setupLog.Error(err, "Error getting clientcmd config")
-		os.Exit(1)
-	}
-
-	kubernetesClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		setupLog.Error(err, "Error getting kubernets client")
-		os.Exit(1)
-	}
-
-	mapper, err := dynamicmapper.NewRESTMapper(kubernetesClient, time.Second)
-	if err != nil {
-		setupLog.Error(err, "Error building REST Mapper:")
-		os.Exit(1)
-	}
-
-	metricsClient := metrics.NewDefaultGetter(config, mapper, metricsclient.NewAvailableAPIsGetter(kubernetesClient))
-	/* END METRIC CLIENT SETUP */
-
-	monitor := monitor.NewMonitor(mgr.GetClient(), metricsClient, podscaleData, depDagERTs, podResponseTimes)
-	if err := monitor.Run(); err != nil {
-		setupLog.Error(err, "could not start monitor controller")
-		os.Exit(1)
-	}
-
 	exposerPort, err := strconv.Atoi(os.Getenv("EXPOSER_PORT"))
 	if err != nil {
 		exposerPort = exposer.DEFAULT_PORT
@@ -301,7 +253,7 @@ func main() {
 		Host: "",
 		Port: exposerPort,
 	}
-	exposer := exposer.NewExposer(httpConfig, podscaleData, depDagERTs, podResponseTimes)
+	exposer := exposer.NewExposer(httpConfig, ddr)
 	if err := exposer.Run(); err != nil {
 		setupLog.Error(err, "could not start exposer controller")
 		os.Exit(1)

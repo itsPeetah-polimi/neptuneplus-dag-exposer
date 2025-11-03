@@ -25,7 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"itspeetah/np-tester/test/utils"
+	"itspeetah/np-dag-expo/test/utils"
 )
 
 var (

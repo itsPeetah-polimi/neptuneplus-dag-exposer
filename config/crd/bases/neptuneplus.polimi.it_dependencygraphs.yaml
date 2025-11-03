@@ -82,19 +82,19 @@ spec:
                         - functionNamespace
                         type: object
                       type: array
-                    nominalResponseTime:
+                    nominalLocalResponseTime:
                       anyOf:
                       - type: integer
                       - type: string
-                      description: Nominal Response Time is the response time recorded
-                        in the profiling phase
+                      description: Nominal Local Response Time is the response time
+                        recorded in the profiling phase
                       pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                       x-kubernetes-int-or-string: true
                   required:
                   - functionName
                   - functionNamespace
                   - invocations
-                  - nominalResponseTime
+                  - nominalLocalResponseTime
                   type: object
                 type: array
             required:
